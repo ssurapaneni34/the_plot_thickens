@@ -279,7 +279,13 @@ else:
             year_range=year_range
         )
     
-    cancer_selector = alt.selection_point(fields=["cause_name"], name="cancerSelect")
+    cancer_selector = alt.selection_point(
+        fields=["cause_name"],
+        name="cancerSelect",
+        on="click",
+        empty="none",
+        clear=False
+    )
 
     # Heatmap Code
     heatmap = (
@@ -287,14 +293,16 @@ else:
         .mark_rect()
         .encode(
             x = alt.X('rei_name', title = 'Risk Factors'),
-            y = alt.Y('cause_name', title = 'Cancer Type'),
+            y = alt.Y('cause_name', title='Cancer Type'),
             color=alt.Color(
                 'val',
                 title="Risk Contribution",
                 scale=alt.Scale(scheme="blueorange", domainMid=0)
             ),
+            stroke=alt.condition(cancer_selector, alt.value("grey"), alt.value(None)),
+            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0)),
             tooltip=['cause_name', 'rei_name', 'val'],
-            opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.3))
+            opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.30))
         ).add_params(cancer_selector)
     )
 
@@ -310,8 +318,6 @@ else:
 
     if selected_val:
         st.session_state.selected_cancer = selected_val
-
-    st.write("### Selected cancer:", st.session_state.selected_cancer)
 
     st.markdown("---")
     
