@@ -54,7 +54,7 @@ AVAILABLE_YEARS = [1990, 1995, 2000, 2005, 2010, 2015, 2020]
 def load_data():
     """Load the deaths and risks data"""
     deaths_df = pd.read_csv("data/Deaths.csv", low_memory=False)
-    risks_df = pd.read_csv("data/RateDaly.csv", low_memory=False)
+    risks_df = pd.read_csv("data/RateDALY.csv", low_memory=False)
     
     # Load state codes and merge with risks data
     state_codes = pd.read_csv("data/stateCodes.csv")
@@ -340,7 +340,8 @@ else:
             try:
                 # Create the map visualization
                 states_map = alt.Chart(states).mark_geoshape().encode(
-                    color='val:Q'
+                    color=alt.Color('val:Q', scale=alt.Scale(domain=[0, 50], scheme='blueorange')),  # Fixed scale from 0 to 50
+                    tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALYs Rate(per 100k)')]
                 ).transform_lookup(
                     lookup='id',
                     from_=alt.LookupData(deaths_ss, 'mapid', list(deaths_ss.columns))
