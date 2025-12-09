@@ -248,7 +248,7 @@ else:
     # === MAIN CONTENT AREA ===
     
     # Show current selections
-    st.info(f"**Analyzing {len(selected_risks)} risk factor(s)** | **{time_display}** | **Cancer: {st.session_state.selected_cancer}**")
+    st.info(f"**Analyzing {len(selected_risks)} risk factor(s)** | **{time_display}**")
     
     if not selected_risks:
         st.warning("⚠️ Please select at least one risk factor to begin analysis")
@@ -306,9 +306,11 @@ else:
         st.session_state.selected_cancer = selected_val
 
     st.markdown("---")
-    
+    # === VISUALIZATIONS 2 & 3 ===
+
     # Detailed analysis for selected cancer
-    st.markdown(f"### Detailed Analysis: **{st.session_state.selected_cancer}**")
+    st.markdown("### Detailed Analysis")
+    st.info(f"**Cancer: {st.session_state.selected_cancer}**")
     st.caption("Click a different cancer in the heatmap above to update these visualizations")
     
     col1, col2 = st.columns(2)
