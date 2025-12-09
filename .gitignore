@@ -1,5 +1,3 @@
-data/
-*.csv
 requirements.txt
 .venv/
 .ipynb_checkpoints/
