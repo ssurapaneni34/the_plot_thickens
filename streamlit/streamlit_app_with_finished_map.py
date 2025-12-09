@@ -357,24 +357,130 @@ else:
                 st.warning(f"Could not render map: {e}")
                 st.info("Map visualization requires proper geographic data structure.")
     
+
+
+    def render_lineplot(
+        risks_df: pd.DataFrame,
+        selected_risks,
+        selected_cancer: str,
+        selected_year: int | None,
+        year_range: tuple[int, int] | None,
+        time_display: str,
+    ):
+        """
+        Render an Altair line plot of risk factor trends over time.
+
+        Parameters
+        ----------
+        risks_df : pd.DataFrame
+            Full risks dataframe (already loaded in streamlit_app.py).
+        selected_risks : list[str]
+            Risk factor names selected in the sidebar.
+        selected_cancer : str
+            Currently selected cancer type (from session_state).
+        selected_year : int or None
+            Single year if time mode is 'Single Year'.
+        year_range : (int, int) or None
+            (start_year, end_year) if time mode is 'Year Range'.
+        time_display : str
+            Human-readable time label (e.g. "Year: 2010" or "Years: 1995 - 2015").
+        """
+        df = risks_df.copy()
+
+        if "measure_name" in df.columns:
+            df = df[df["measure_name"] != "Deaths"]
+
+        # Filter by selected cancer type
+        df = df[df["cause_name"] == selected_cancer]
+
+        # Filter by selected risk factors
+        df = df[df["rei_name"].isin(selected_risks)]
+
+        df["year"] = df["year"].astype(int)
+        df["val"] = df["val"].astype(float)
+
+        # Filter by time
+        if selected_year is not None:
+            df = df[df["year"] == selected_year]
+        elif year_range is not None:
+            df = df[(df["year"] >= year_range[0]) & (df["year"] <= year_range[1])]
+        
+
+        if df.empty:
+            st.warning(
+                "No data available for this cancer, risk factors, and time selection. "
+                "Try changing the filters in the sidebar."
+            )
+            return
+
+        # Aggregate across locations / sex / age: mean val per (year, risk factor)
+        agg_df = (
+            df.groupby(["year", "rei_name"], as_index=False)["val"]
+            .mean()
+        )
+
+        # Build the line chart
+        chart = (
+            alt.Chart(agg_df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X("year:O", title="Year"),
+                y=alt.Y("val:Q", title="Mean value of DALYs rate (per 100k)"),
+                color=alt.Color("rei_name:N", title="Risk factor"),
+                tooltip=[
+                    alt.Tooltip("year:O", title="Year"),
+                    alt.Tooltip("rei_name:N", title="Risk factor"),
+                    alt.Tooltip("val:Q", title="Mean val of DALYs rate (per 100k)", format=".2f"),
+                ],
+            )
+            .properties(
+                height=350,
+                title=f"Temporal trends for {selected_cancer}\n{time_display}",
+            )
+            .interactive()
+        )
+
+        st.altair_chart(chart, use_container_width=True)
+
+
     with col2:
-        st.subheader("Temporal Trends (jack map)")
         st.caption(f"Risk factor trends over time for {st.session_state.selected_cancer}")
+
+
+        #####  This needs to be removed once the heatmap is ready
+        def get_cancer_list(risks_df):
+            """Get unique list of cancer types from data"""
+            return sorted(risks_df['cause_name'].unique())
         
-        # Placeholder for line chart
-        line_placeholder = st.empty()
+        cancer_list = get_cancer_list(risks_df)
+        if (
+            "selected_cancer" not in st.session_state
+            or st.session_state.selected_cancer not in cancer_list
+        ):
+            st.session_state.selected_cancer = get_default_cancer(risks_df)
+
+        #selected_cancer = st.selectbox(
+        #    "Choose a cancer type:",
+        #    options=cancer_list,
+        #    index=cancer_list.index(st.session_state.selected_cancer),
+        #    key="cancer_select",
+        #)
+
+        # Keep session_state in sync with the widget
+        #st.session_state.selected_cancer = selected_cancer
+
+        render_lineplot(
+            risks_df=risks_df,
+            selected_risks=selected_risks,
+            selected_cancer=st.session_state.selected_cancer,
+            selected_year=selected_year,
+            year_range=year_range,
+            time_display=time_display,
+        )
+
+        ###st.subheader("Temporal Trends (jack map)")
+        ###st.caption(f"Risk factor trends over time for {st.session_state.selected_cancer}")
         
-        with line_placeholder.container():
-            st.info("**Line Chart**\n\nEach risk factor as a separate line showing changes over time.")
-            
-            st.code(f"""
-# Data for line chart:
-- Cancer: {st.session_state.selected_cancer}
-- Risk factors: {selected_risks} (each as separate line)
-- X-axis: Years (1990-2020)
-- Y-axis: Risk level/deaths
-- Time filter: {time_display}
-            """)
     
     # === ADDITIONAL INFO ===
     with st.expander("ℹ️ Data Information"):
