@@ -152,7 +152,7 @@ if page == "About":
     1. Select risk factors you want to analyze
     2. Choose a specific year or time range
     3. Explore the heatmap to see risk-cancer relationships
-    4. Click on a cancer type to see detailed state-level and temporal analyses
+    4. Click a heatmap cell to view detailed cancer-specific state and temporal analyses
     
     **Team Members:**
     Sriya, Jack, Zoe, and Ryan
