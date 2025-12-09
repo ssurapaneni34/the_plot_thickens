@@ -484,16 +484,7 @@ else:
         ):
             st.session_state.selected_cancer = get_default_cancer(risks_df)
 
-        #selected_cancer = st.selectbox(
-        #    "Choose a cancer type:",
-        #    options=cancer_list,
-        #    index=cancer_list.index(st.session_state.selected_cancer),
-        #    key="cancer_select",
-        #)
-
-        # Keep session_state in sync with the widget
-        #st.session_state.selected_cancer = selected_cancer
-
+   
         render_lineplot(
             risks_df=risks_df,
             selected_risks=selected_risks,
@@ -503,8 +494,6 @@ else:
             time_display=time_display,
         )
 
-        ###st.subheader("Temporal Trends (jack map)")
-        ###st.caption(f"Risk factor trends over time for {st.session_state.selected_cancer}")
         
     
     # === ADDITIONAL INFO ===
@@ -513,7 +502,7 @@ else:
         st.write(f"**Total rows in Risks data:** {len(risks_df):,}")
         st.write(f"**Available risk factors in data:** {len(risks_df['rei_name'].unique())}")
         st.write(f"**Available cancer types in data:** {len(risks_df['cause_name'].unique())}")
-        st.write(f"**Available states:** {len(risks_df['location_name'].unique())}")
+        st.write(f"**Available states (or districts):** {len(risks_df['location_name'].unique())}")
     
     # === FOOTER ===
     st.markdown("---")
