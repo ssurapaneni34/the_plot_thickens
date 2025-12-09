@@ -475,6 +475,7 @@ else:
 
 
     with col2:
+        st.subheader("Temporal Distribution")
         st.caption(f"Risk factor trends over time for {st.session_state.selected_cancer}")
 
 
