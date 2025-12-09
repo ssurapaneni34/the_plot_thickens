@@ -7,7 +7,7 @@ from vega_datasets import data as vega_data
 # Page configuration
 st.set_page_config(
     page_title="Cancer Risk Factors Across the US",
-    page_icon="🔬",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -52,7 +52,7 @@ AVAILABLE_YEARS = [1990, 1995, 2000, 2005, 2010, 2015, 2020]
 
 @st.cache_data
 def load_data():
-    """Load the deaths and risks data"""
+    # Load deaths and risks data
     deaths_df = pd.read_csv("data/Deaths.csv", low_memory=False)
     risks_df = pd.read_csv("data/RateDALY.csv", low_memory=False)
     
@@ -62,34 +62,20 @@ def load_data():
     risks_df = risks_df[risks_df['rei_name'] != 'rei_name']
     risks_df['year'] = pd.to_numeric(risks_df['year'], errors='coerce').astype(int)
     
-    # FIX: Convert val to numeric (currently it's a string!)
     risks_df['val'] = pd.to_numeric(risks_df['val'], errors='coerce')
 
     return deaths_df, risks_df
 
 
 def get_default_cancer(risks_df):
-    """Get a default cancer to display (e.g., most common one)"""
-    # Can change this logic to pick whatever default makes sense, right now it's Bladder
+    # Get a default cancer type (second in sorted list)
     cancers = sorted(risks_df['cause_name'].unique())
-    st. write("Available cancers for default selection:", cancers)
+    #st. write("Available cancers for default selection:", cancers)
 
     return cancers[1] if len(cancers) > 0 else None
 
 def get_filtered_data(risks_df, selected_risks, year=None, year_range=None):
-    """
-    Filter the risks dataframe based on selections.
-    
-    Parameters:
-    - risks_df: full risks dataframe
-    - selected_risks: list of risk factor names
-    - year: single year (int) or None
-    - year_range: tuple of (start_year, end_year) or None
-    
-    Returns:
-    - filtered dataframe
-    """
-    
+    # Filter risks_df based on selected risks and time
     filtered = risks_df[risks_df['rei_name'].isin(selected_risks)]
 
     if year is not None:
@@ -100,17 +86,17 @@ def get_filtered_data(risks_df, selected_risks, year=None, year_range=None):
     return filtered
 
 def get_cancer_list(risks_df):
-    """Get unique list of cancer types from data"""
+    # Get unique list of cancer types from data
     return sorted(risks_df['cause_name'].unique())
 
 def get_state_list(risks_df):
-    """Get unique list of states from data"""
+    # Get unique list of states from data
     return sorted(risks_df['location_name'].unique())
 
 # Initialize session state for selected cancer
 if 'selected_cancer' not in st.session_state:
     st.session_state.selected_cancer = None
-    st.session_state.needs_default = True  # Flag to set default after data loads
+    st.session_state.needs_default = True 
 
 # Sidebar navigation
 page = st.sidebar.radio("Navigation", ["Main Dashboard", "About"])
@@ -163,7 +149,7 @@ if page == "About":
     4. Click on a cancer type to see detailed state-level and temporal analyses
     
     **Team Members:**
-    [Add team member names here]
+    Sriya, Jack, Zoe, and Ryan
     
     **Last Updated:** December 2025
     """)
@@ -190,10 +176,10 @@ else:
     
     st.sidebar.header("Filters")
     
-    # === RISK FACTOR SELECTOR ===
+    # Risk factor selection
     st.sidebar.subheader("1. Select Risk Factors")
     
-    # Quick selection buttons for categories
+    # Quick selection buttons 
     col1, col2, col3 = st.sidebar.columns(3)
     
     with col1:
@@ -208,7 +194,7 @@ else:
         if st.button("All Metabolic", use_container_width=True):
             st.session_state.selected_risks = RISK_FACTORS["Metabolic"].copy()
     
-    # Initialize selected_risks if not in session state
+    # Initialize selected_risks 
     if 'selected_risks' not in st.session_state:
         st.session_state.selected_risks = ["Tobacco", "High alcohol use", "Air pollution"]
     
@@ -230,7 +216,7 @@ else:
                 selected_categories.append(category)
         st.sidebar.caption(f"Categories: {', '.join(selected_categories)}")
     
-    # === TIME SELECTOR ===
+    # Time period selection
     st.sidebar.subheader("2. Select Time Period")
     
     # Toggle between single year and range
@@ -268,7 +254,7 @@ else:
         st.warning("⚠️ Please select at least one risk factor to begin analysis")
         st.stop()
     
-    # === VISUALIZATION 1: CANCER vs RISK FACTORS HEATMAP (sriya map) ===
+    # === VISUALIZATION 1: HEATMAP ===
     st.header("Cancer Types vs Risk Factors")
     st.markdown("**Click on a cancer type** to update the geographic and temporal visualizations below")
     
@@ -321,18 +307,17 @@ else:
 
     st.markdown("---")
     
-    # === VISUALIZATIONS 2 & 3 (NEED TO DEFAULT TO A SPECIFIC CANCER) ===
+    # Detailed analysis for selected cancer
     st.markdown(f"### Detailed Analysis: **{st.session_state.selected_cancer}**")
     st.caption("Click a different cancer in the heatmap above to update these visualizations")
     
-    # Create two columns for the detailed views
     col1, col2 = st.columns(2)
     
     with col1:
         st.subheader("Geographic Distribution")
         st.caption(f"Risk factors for {st.session_state.selected_cancer} across US states, calculated by DALYs are Disability-Adjusted Life Years, a measure of overall disease burden.")
         
-        # Prepare data for map
+        # Filter Data
         filtered_data = get_filtered_data(
             risks_df, 
             selected_risks, 
@@ -353,7 +338,7 @@ else:
             'val': 'sum'
         }).reset_index()
 
-        # Merge and calculate "intensity" = sum / count
+        # Merge and calculate avg
         deaths_ss = state_sums.merge(state_counts, on=['location_name', 'mapid'])
         deaths_ss['val'] = deaths_ss['val'] / deaths_ss['count']
 
@@ -366,12 +351,12 @@ else:
             deaths_ss = deaths_ss.dropna(subset=['mapid', 'val'])
             deaths_ss['mapid'] = deaths_ss['mapid'].astype(int)
 
-            # Load states geojson for the map (you may need to adjust based on your data structure)        
+            # Load states geojson for the map 
             states = alt.topo_feature(vega_data.us_10m.url, feature='states')
             try:
                 # Create the map visualization
                 states_map = alt.Chart(states).mark_geoshape().encode(
-                    color=alt.Color('val:Q', scale=alt.Scale(domain=[0, 50], scheme='blueorange')),  # Fixed scale from 0 to 50
+                    color=alt.Color('val:Q', scale=alt.Scale(domain=[0, 50], scheme='blueorange')), 
                     tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALYs Rate(per 100k)')]
                 ).transform_lookup(
                     lookup='id',
