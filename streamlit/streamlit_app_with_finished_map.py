@@ -101,7 +101,7 @@ if 'selected_cancer' not in st.session_state:
 # Sidebar navigation
 page = st.sidebar.radio("Navigation", ["Main Dashboard", "About Page"])
 
-if page == "About":
+if page == "About Page":
     st.title("About This Project")
     st.markdown("""
     ## Cancer Risk Factors Analysis
@@ -329,7 +329,7 @@ else:
     st.write("")
 
     # Larger, more informative caption
-    st.markdown("<h6><strong>Click a different cancer in the heatmap above</strong> to update these visualizations. <strong>Use the sidebar</strong> to change risk factors and time period.</h4>", unsafe_allow_html=True)
+    st.markdown("<h6><strong>Click a different cancer row in the heatmap above</strong> to update these visualizations. <strong>Use the sidebar</strong> to change risk factors and time period.</h4>", unsafe_allow_html=True)
     st.write("")
 
     col1, col2 = st.columns(2)
