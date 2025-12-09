@@ -111,9 +111,15 @@ if page == "About":
     This interactive dashboard explores how different risk factors contribute to various cancer types 
     across the United States over time. 
     
-    **Data Sources:**
-    - Cancer mortality data from [Data Source]
-    - Risk factor data from [Data Source]
+    **Data Source:**
+
+    > Global Burden of Disease Collaborative Network.
+    > 
+    > Global Burden of Disease Study 2023 (GBD 2023) Results.
+    >
+    > Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2024.
+    >
+    > Available from https://vizhub.healthdata.org/gbd-results/.
     
     **Risk Factor Categories:**
     
@@ -156,7 +162,7 @@ if page == "About":
 
 else:
     # Main Dashboard
-    st.title("🔬 Cancer Risk Factors Across the US")
+    st.title("📊 Cancer Risk Factors Across the US")
     st.markdown("Explore how environmental, behavioral, and metabolic risk factors contribute to different cancer types across states and time")
     
     # Load data
@@ -283,11 +289,11 @@ else:
             color=alt.Color(
                 'val',
                 title="Risk Contribution",
-                scale=alt.Scale(scheme="blueorange", domainMid=0)
+                scale=alt.Scale(scheme="blueorange", domainMid=10)
             ),
             stroke=alt.condition(cancer_selector, alt.value("grey"), alt.value(None)),
             strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0)),
-            tooltip=['cause_name', 'rei_name', 'val'],
+            tooltip=[alt.Tooltip('cause_name:N', title='Cancer Type'), alt.Tooltip('rei_name:N', title='Risk Factor'), alt.Tooltip('val:Q', title='Risk Contribution', format=".2f")],
             opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.30))
         ).add_params(cancer_selector)
     )
@@ -358,8 +364,8 @@ else:
             try:
                 # Create the map visualization
                 states_map = alt.Chart(states).mark_geoshape().encode(
-                    color=alt.Color('val:Q', scale=alt.Scale(domain=[0, 50], scheme='blueorange')), 
-                    tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALYs Rate(per 100k)')]
+                    color=alt.Color('val:Q', title='Avg. DALYs Rate (per 100k)', scale=alt.Scale(domainMid=10, scheme='blueorange')), 
+                    tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALYs Rate (per 100k)', format=".2f")]
                 ).transform_lookup(
                     lookup='id',
                     from_=alt.LookupData(deaths_ss, 'mapid', list(deaths_ss.columns))
@@ -443,12 +449,12 @@ else:
             .mark_line(point=True)
             .encode(
                 x=alt.X("year:O", title="Year"),
-                y=alt.Y("val:Q", title="Mean value of DALYs rate (per 100k)"),
+                y=alt.Y("val:Q", title="Avg. DALYs Rate (per 100k)"),
                 color=alt.Color("rei_name:N", title="Risk factor"),
                 tooltip=[
                     alt.Tooltip("year:O", title="Year"),
                     alt.Tooltip("rei_name:N", title="Risk factor"),
-                    alt.Tooltip("val:Q", title="Mean val of DALYs rate (per 100k)", format=".2f"),
+                    alt.Tooltip("val:Q", title="Avg. DALYs Rate (per 100k)", format=".2f"),
                 ],
             )
             .properties(
