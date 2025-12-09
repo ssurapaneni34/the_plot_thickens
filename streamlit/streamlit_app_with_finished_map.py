@@ -99,7 +99,7 @@ if 'selected_cancer' not in st.session_state:
     st.session_state.needs_default = True 
 
 # Sidebar navigation
-page = st.sidebar.radio("Navigation", ["Main Dashboard", "About"])
+page = st.sidebar.radio("Navigation", ["Main Dashboard", "About Page"])
 
 if page == "About":
     st.title("About This Project")
@@ -163,8 +163,11 @@ if page == "About":
 else:
     # Main Dashboard
     st.title("📊 Cancer Risk Factors Across the US")
-    st.markdown("Explore how environmental, behavioral, and metabolic risk factors contribute to different cancer types across states and time")
+    st.markdown("<h4 style='color: #0e7490;'>Explore how environmental, behavioral, and metabolic risk factors contribute to different cancer types across states and time.</h3>", unsafe_allow_html=True)
     
+    # Add spacing
+    st.write("")  # Single blank line
+    st.write("")  # Another blank line for more space
     # Load data
     try:
         deaths_df, risks_df = load_data()
@@ -239,7 +242,7 @@ else:
             value=2010
         )
         year_range = None
-        time_display = f"Year: {selected_year}"
+        time_display = selected_year
     else:
         year_range = st.sidebar.select_slider(
             "Select year range:",
@@ -247,23 +250,19 @@ else:
             value=(1995, 2015)
         )
         selected_year = None
-        time_display = f"Years: {year_range[0]} - {year_range[1]}"
+        time_display = f"{year_range[0]} - {year_range[1]}"
     
-    st.sidebar.caption(time_display)
+    # st.sidebar.caption(time_display)
     
     # === MAIN CONTENT AREA ===
-    
-    # Show current selections
-    st.info(f"**Analyzing {len(selected_risks)} risk factor(s)** | **{time_display}**")
     
     if not selected_risks:
         st.warning("⚠️ Please select at least one risk factor to begin analysis")
         st.stop()
     
     # === VISUALIZATION 1: HEATMAP ===
-    st.header("Cancer Types vs Risk Factors")
-    st.markdown("**Click on a cancer type** to update the geographic and temporal visualizations below")
-    
+    st.subheader("Cancer Types vs Risk Factors Heatmap")
+    st.markdown("**Click on any cell in a cancer row** to update the geographic and temporal visualizations below.")    
     filtered_data = get_filtered_data(
             risks_df, 
             selected_risks, 
@@ -284,7 +283,7 @@ else:
         alt.Chart(filtered_data)
         .mark_rect()
         .encode(
-            x = alt.X('rei_name', title = 'Risk Factors'),
+            x = alt.X('rei_name', title = 'Risk Factors', axis=alt.Axis(labelAngle=0)),
             y = alt.Y('cause_name', title='Cancer Type'),
             color=alt.Color(
                 'val',
@@ -296,6 +295,9 @@ else:
             tooltip=[alt.Tooltip('cause_name:N', title='Cancer Type'), alt.Tooltip('rei_name:N', title='Risk Factor'), alt.Tooltip('val:Q', title='Risk Contribution', format=".2f")],
             opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.30))
         ).add_params(cancer_selector)
+        .properties(
+        height=600
+        )
     )
 
     event = st.altair_chart(heatmap, key="heatmap", on_select="rerun")
@@ -315,15 +317,26 @@ else:
     # === VISUALIZATIONS 2 & 3 ===
 
     # Detailed analysis for selected cancer
-    st.markdown("### Detailed Analysis")
-    st.info(f"**Cancer: {st.session_state.selected_cancer}**")
-    st.caption("Click a different cancer in the heatmap above to update these visualizations")
+    st.header("Explore by State and Over Time")
     
+    st.markdown(f"""
+    <div style='background-color: #d1ecf1; padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid #0e7490;'>
+        <p style='font-size: 1.3rem; margin: 0; color: #0c5460;'><strong>Analyzing {len(selected_risks)} risk factor(s) for {st.session_state.selected_cancer} in {time_display}</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Add spacing
+    st.write("")
+
+    # Larger, more informative caption
+    st.markdown("<h6><strong>Click a different cancer in the heatmap above</strong> to update these visualizations. <strong>Use the sidebar</strong> to change risk factors and time period.</h4>", unsafe_allow_html=True)
+    st.write("")
+
     col1, col2 = st.columns(2)
     
     with col1:
         st.subheader("Geographic Distribution")
-        st.caption(f"Risk factors for {st.session_state.selected_cancer} across US states, calculated by DALYs are Disability-Adjusted Life Years, a measure of overall disease burden.")
+        st.caption(f"Risk factors for {st.session_state.selected_cancer} across US states")
         
         # Filter Data
         filtered_data = get_filtered_data(
@@ -459,7 +472,6 @@ else:
             )
             .properties(
                 height=350,
-                title=f"Temporal trends for {selected_cancer}\n{time_display}",
             )
             .interactive()
         )
@@ -495,7 +507,7 @@ else:
         )
 
         
-    
+    st.markdown("<h6><span style='color: #0e7490; '> Values are measured in DALYs (Disability-Adjusted Life Years) per 100,000 population. DALYs represent the total burden of disease, combining years lost due to premature death and years lived with disability.</span>", unsafe_allow_html=True)
     # === ADDITIONAL INFO ===
     with st.expander("ℹ️ Data Information"):
         st.write(f"**Total rows in Deaths data:** {len(deaths_df):,}")
