@@ -272,22 +272,53 @@ else:
     st.header("Cancer Types vs Risk Factors")
     st.markdown("**Click on a cancer type** to update the geographic and temporal visualizations below")
     
-    # Placeholder for heatmap
-    heatmap_placeholder = st.empty()
+    filtered_data = get_filtered_data(
+            risks_df, 
+            selected_risks, 
+            year=selected_year, 
+            year_range=year_range
+        )
     
-    with heatmap_placeholder.container():
-        st.info("**Heatmap Visualization**\n\nThis will show cancer types (rows) vs selected risk factors (columns). Click on a cancer to update the visualizations below.")
-        
-        # Example of what will be passed to visualization component
-        st.code(f"""
-# Data that will be available for heatmap:
-- Selected risks: {selected_risks}
-- Time period: {time_display}
-- Data source: risks_df filtered by selections
-- Interaction: clickable cancer selection → updates st.session_state.selected_cancer
-- Current selection: {st.session_state.selected_cancer} (highlighted in heatmap)
-        """)
+    cancer_selector = alt.selection_point(
+        fields=["cause_name"],
+        name="cancerSelect",
+        on="click",
+        empty="none",
+        clear=False
+    )
+
+    # Heatmap Code
+    heatmap = (
+        alt.Chart(filtered_data)
+        .mark_rect()
+        .encode(
+            x = alt.X('rei_name', title = 'Risk Factors'),
+            y = alt.Y('cause_name', title='Cancer Type'),
+            color=alt.Color(
+                'val',
+                title="Risk Contribution",
+                scale=alt.Scale(scheme="blueorange", domainMid=0)
+            ),
+            stroke=alt.condition(cancer_selector, alt.value("grey"), alt.value(None)),
+            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0)),
+            tooltip=['cause_name', 'rei_name', 'val'],
+            opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.30))
+        ).add_params(cancer_selector)
+    )
+
+    event = st.altair_chart(heatmap, key="heatmap", on_select="rerun")
     
+    selected_val = None
+    if event:
+        sel = event.get("selection", {})
+        cancer_sel = sel.get("cancerSelect", [])
+
+        if isinstance(cancer_sel, list) and len(cancer_sel) > 0:
+            selected_val = cancer_sel[0].get("cause_name")
+
+    if selected_val:
+        st.session_state.selected_cancer = selected_val
+
     st.markdown("---")
     
     # === VISUALIZATIONS 2 & 3 (NEED TO DEFAULT TO A SPECIFIC CANCER) ===
