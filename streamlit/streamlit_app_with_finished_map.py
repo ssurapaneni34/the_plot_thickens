@@ -310,7 +310,7 @@ else:
                 alt.Tooltip('tooltip_val:N', title='Risk Contribution', format=".2f") 
             ],
             stroke=alt.condition(cancer_selector, alt.value("gray"), alt.value("gray")),
-            strokeWidth=alt.condition(cancer_selector, alt.value(4), alt.value(1))
+            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(None))
         )
         .add_params(cancer_selector)
         .properties(
