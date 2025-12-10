@@ -275,7 +275,6 @@ else:
         name="cancerSelect",
         on="click",
         empty="none",
-        clear=False,
     )
 
     # Heatmap Code
