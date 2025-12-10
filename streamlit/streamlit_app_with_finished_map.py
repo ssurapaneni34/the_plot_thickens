@@ -275,8 +275,11 @@ else:
         name="cancerSelect",
         on="click",
         empty="none",
-    )
+        clear="False", 
+        init={"cause_name": st.session_state.selected_cancer}  # Use the default cancer here
 
+    )
+    st.write("testing")
     # Heatmap Code
     IMPUTE_VALUE = -1 
 
