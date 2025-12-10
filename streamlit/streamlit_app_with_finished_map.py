@@ -275,7 +275,7 @@ else:
         name="cancerSelect",
         on="click",
         empty="none",
-        clear="False", 
+        clear=False, 
         init={"cause_name": st.session_state.selected_cancer}  # Use the default cancer here
 
     )
