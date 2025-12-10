@@ -277,7 +277,6 @@ else:
         clear=False, 
 
     )
-    st.write("testing")
     # Heatmap Code
     IMPUTE_VALUE = -1 
 
@@ -310,8 +309,8 @@ else:
                 alt.Tooltip('rei_name:N', title='Risk Factor'), 
                 alt.Tooltip('tooltip_val:N', title='Risk Contribution', format=".2f") 
             ],
-            stroke=alt.condition(cancer_selector, alt.value("darkred"), alt.value(None)),
-            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0))
+            stroke=alt.condition(cancer_selector, alt.value("white"), alt.value("black")),
+            # strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0))
         )
         .add_params(cancer_selector)
         .properties(
