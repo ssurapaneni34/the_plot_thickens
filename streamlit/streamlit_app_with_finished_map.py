@@ -463,12 +463,12 @@ else:
             #.mark_line(point=True)
             .encode(
                 x=alt.X("year:O", title="Year"),
-                y=alt.Y("val:Q", title="Avg. DALYs Rate (per 100k)"),
+                y=alt.Y("val:Q", title="DALYs Rate (per 100k)"),
                 color=alt.Color("rei_name:N", title="Risk factor"),
                 tooltip=[
                     alt.Tooltip("year:O", title="Year"),
                     alt.Tooltip("rei_name:N", title="Risk factor"),
-                    alt.Tooltip("val:Q", title="Avg. DALYs Rate (per 100k)", format=".2f"),
+                    alt.Tooltip("val:Q", title="DALYs Rate (per 100k)", format=".2f"),
                 ],
             )
             .properties(
