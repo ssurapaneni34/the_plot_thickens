@@ -377,8 +377,8 @@ else:
             try:
                 # Create the map visualization
                 states_map = alt.Chart(states).mark_geoshape().encode(
-                    color=alt.Color('val:Q', title='Avg. DALYs Rate (per 100k)', scale=alt.Scale(domainMid=10, scheme='blueorange')), 
-                    tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALYs Rate (per 100k)', format=".2f")]
+                    color=alt.Color('val:Q', title='Avg. DALY Rate (per 100k)', scale=alt.Scale(domainMid=10, scheme='blueorange')), 
+                    tooltip=[alt.Tooltip('location_name:N', title='State'), alt.Tooltip('val:Q', title='Avg. DALY Rate (per 100k)', format=".2f")]
                 ).transform_lookup(
                     lookup='id',
                     from_=alt.LookupData(deaths_ss, 'mapid', list(deaths_ss.columns))
@@ -463,12 +463,12 @@ else:
             #.mark_line(point=True)
             .encode(
                 x=alt.X("year:O", title="Year"),
-                y=alt.Y("val:Q", title="DALYs Rate (per 100k)"),
+                y=alt.Y("val:Q", title="DALY Rate (per 100k)"),
                 color=alt.Color("rei_name:N", title="Risk factor"),
                 tooltip=[
                     alt.Tooltip("year:O", title="Year"),
                     alt.Tooltip("rei_name:N", title="Risk factor"),
-                    alt.Tooltip("val:Q", title="DALYs Rate (per 100k)", format=".2f"),
+                    alt.Tooltip("val:Q", title="DALY Rate (per 100k)", format=".2f"),
                 ],
             )
             .properties(
