@@ -275,6 +275,7 @@ else:
         name="cancerSelect",
         on="click",
         clear=False, 
+
     )
     st.write("testing")
     # Heatmap Code
