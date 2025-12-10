@@ -459,7 +459,8 @@ else:
         # Build the line chart
         chart = (
             alt.Chart(agg_df)
-            .mark_line(point=True)
+            .mark_line(point=alt.MarkConfig(size=120))
+            #.mark_line(point=True)
             .encode(
                 x=alt.X("year:O", title="Year"),
                 y=alt.Y("val:Q", title="Avg. DALYs Rate (per 100k)"),
