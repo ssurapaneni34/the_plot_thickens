@@ -64,7 +64,7 @@ def load_data():
     
     risks_df['val'] = pd.to_numeric(risks_df['val'], errors='coerce')
 
-    return deaths_df, risks_df
+    return risks_df
 
 
 def get_default_cancer(risks_df):
@@ -170,7 +170,7 @@ else:
     st.write("")  # Another blank line for more space
     # Load data
     try:
-        deaths_df, risks_df = load_data()
+        risks_df = load_data()
         st.sidebar.success("✓ Data loaded successfully")
         
         # Set default cancer if needed
@@ -275,28 +275,55 @@ else:
         name="cancerSelect",
         on="click",
         empty="none",
-        clear=False
+        clear='False'
     )
 
     # Heatmap Code
+    IMPUTE_VALUE = -1 
+
+    # --- Define the Chart ---
     heatmap = (
         alt.Chart(filtered_data)
+        
+        .transform_impute(
+            impute='val',
+            key='rei_name', 
+            groupby=['cause_name'], 
+            value=IMPUTE_VALUE
+        ) 
+        
+        .transform_calculate(
+            tooltip_val="datum.val == " + str(IMPUTE_VALUE) + " ? 'Missing (N/A)' : datum.val"
+        )
+
         .mark_rect()
         .encode(
-            x = alt.X('rei_name', title = 'Risk Factors', axis=alt.Axis(labelAngle=0)),
-            y = alt.Y('cause_name', title='Cancer Type'),
+            x=alt.X('rei_name', title='Risk Factors', axis=alt.Axis(labelAngle=0)),
+            y=alt.Y('cause_name', title='Cancer Type'),
+            
+            # Color encoding
             color=alt.Color(
                 'val',
                 title="Risk Contribution",
-                scale=alt.Scale(scheme="blueorange", domainMid=10)
+                scale=alt.Scale(
+                    scheme="blueorange", 
+                    domainMid=10 
+                )
             ),
-            stroke=alt.condition(cancer_selector, alt.value("grey"), alt.value(None)),
-            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0)),
-            tooltip=[alt.Tooltip('cause_name:N', title='Cancer Type'), alt.Tooltip('rei_name:N', title='Risk Factor'), alt.Tooltip('val:Q', title='Risk Contribution', format=".2f")],
-            opacity=alt.condition(cancer_selector, alt.value(1), alt.value(0.30))
-        ).add_params(cancer_selector)
+            
+            # Tooltip
+            tooltip=[
+                alt.Tooltip('cause_name:N', title='Cancer Type'), 
+                alt.Tooltip('rei_name:N', title='Risk Factor'), 
+                alt.Tooltip('tooltip_val:N', title='Risk Contribution', format=".2f") 
+            ],
+            
+            stroke=alt.condition(cancer_selector, alt.value("darkred"), alt.value(None)),
+            strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0))
+        )
+        .add_params(cancer_selector)
         .properties(
-        height=600
+            height=600
         )
     )
 
@@ -511,7 +538,6 @@ else:
     st.markdown("<h6><span style='color: #0e7490; '> Values are measured in DALYs (Disability-Adjusted Life Years) per 100,000 population. DALYs represent the total burden of disease, combining years lost due to premature death and years lived with disability.</span>", unsafe_allow_html=True)
     # === ADDITIONAL INFO ===
     with st.expander("ℹ️ Data Information"):
-        st.write(f"**Total rows in Deaths data:** {len(deaths_df):,}")
         st.write(f"**Total rows in Risks data:** {len(risks_df):,}")
         st.write(f"**Available risk factors in data:** {len(risks_df['rei_name'].unique())}")
         st.write(f"**Available cancer types in data:** {len(risks_df['cause_name'].unique())}")
