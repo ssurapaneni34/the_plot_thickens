@@ -516,6 +516,4 @@ else:
         st.write(f"**Available cancer types in data:** {len(risks_df['cause_name'].unique())}")
         st.write(f"**Available states (or districts):** {len(risks_df['location_name'].unique())}")
     
-    # === FOOTER ===
-    st.markdown("---")
-    st.caption("Data sources: [Add your data sources] | Last updated: December 2025")
+ 
