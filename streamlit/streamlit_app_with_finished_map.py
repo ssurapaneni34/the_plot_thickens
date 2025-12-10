@@ -275,7 +275,7 @@ else:
         name="cancerSelect",
         on="click",
         empty="none",
-        clear='False'
+        clear=False
     )
 
     # Heatmap Code
@@ -284,24 +284,19 @@ else:
     # --- Define the Chart ---
     heatmap = (
         alt.Chart(filtered_data)
-        
         .transform_impute(
             impute='val',
             key='rei_name', 
             groupby=['cause_name'], 
             value=IMPUTE_VALUE
         ) 
-        
         .transform_calculate(
             tooltip_val="datum.val == " + str(IMPUTE_VALUE) + " ? 'Missing (N/A)' : datum.val"
         )
-
         .mark_rect()
         .encode(
             x=alt.X('rei_name', title='Risk Factors', axis=alt.Axis(labelAngle=0)),
             y=alt.Y('cause_name', title='Cancer Type'),
-            
-            # Color encoding
             color=alt.Color(
                 'val',
                 title="Risk Contribution",
@@ -310,14 +305,11 @@ else:
                     domainMid=10 
                 )
             ),
-            
-            # Tooltip
             tooltip=[
                 alt.Tooltip('cause_name:N', title='Cancer Type'), 
                 alt.Tooltip('rei_name:N', title='Risk Factor'), 
                 alt.Tooltip('tooltip_val:N', title='Risk Contribution', format=".2f") 
             ],
-            
             stroke=alt.condition(cancer_selector, alt.value("darkred"), alt.value(None)),
             strokeWidth=alt.condition(cancer_selector, alt.value(2), alt.value(0))
         )
