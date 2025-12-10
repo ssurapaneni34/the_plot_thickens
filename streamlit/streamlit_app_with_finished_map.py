@@ -276,7 +276,6 @@ else:
         on="click",
         empty="none",
         clear=False,
-        init={}
     )
 
     # Heatmap Code
